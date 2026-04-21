@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shuvo Das | Fire Protection Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand: #E63A1E;
+  --brand-dark: #B02C14;
+  --brand-light: #FF6347;
+  --steel: #4A4A4A;
+  --muted: #777;
+  --ghost: #C0C0C0;
+  --line: rgba(255,255,255,0.07);
+  --bg: #0A0A0A;
+  --bg-2: #111111;
+  --bg-3: #1A1A1A;
+  --bg-4: #222222;
+  --white: #FFFFFF;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: none;
+}
+#cursor {
+  position: fixed; width: 12px; height: 12px;
+  background: var(--brand); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, background 0.3s;
+}
+#cursor-ring {
+  position: fixed; width: 36px; height: 36px;
+  border: 1px solid rgba(230,58,30,0.5); border-radius: 50%;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, opacity 0.3s;
+}
+#fire-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 0; opacity: 0.35;
+}
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 5vw; height: 64px;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+  animation: navIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+@keyframes navIn { from { transform: translateY(-100%); opacity: 0; } to { transform: none; opacity: 1; } }
+.nav-logo {
+  font-family: var(--font-display); font-size: 26px; letter-spacing: 1px;
+  color: var(--white); text-decoration: none; position: relative;
+}
+.nav-logo span { color: var(--brand); }
+.nav-logo::after {
+  content: ''; position: absolute; bottom: -2px; left: 0;
+  width: 0; height: 2px; background: var(--brand); transition: width 0.3s;
+}
+.nav-logo:hover::after { width: 100%; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+  color: var(--ghost); text-decoration: none; letter-spacing: 0.06em;
+  position: relative; transition: color 0.2s;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -3px; left: 0;
+  width: 0; height: 1px; background: var(--brand); transition: width 0.25s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  background: var(--brand) !important; color: var(--white) !important;
+  padding: 8px 20px; border-radius: 3px;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s !important;
+}
+.nav-cta:hover { background: var(--brand-light) !important; transform: translateY(-1px) !important; box-shadow: 0 4px 20px rgba(230,58,30,0.4) !important; }
+.nav-cta::after { display: none !important; }
+#hero {
+  min-height: 100vh;
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; padding: 120px 5vw 80px; gap: 60px;
+  position: relative; z-index: 1; overflow: hidden;
+}
+#hero::before {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 55%; height: 100%;
+  background: radial-gradient(ellipse at 70% 50%, rgba(230,58,30,0.09) 0%, transparent 60%);
+  pointer-events: none; animation: heroGlow 4s ease-in-out infinite alternate;
+}
+@keyframes heroGlow { from { opacity: 0.4; } to { opacity: 1; } }
+.h-anim { opacity: 0; transform: translateY(32px); }
+.h-anim.go { animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes fadeUp { to { opacity: 1; transform: none; } }
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--brand); letter-spacing: 0.12em;
+  border: 1px solid rgba(230,58,30,0.35);
+  padding: 6px 14px; border-radius: 2px; margin-bottom: 24px;
+}
+.hero-tag::before {
+  content: ''; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--brand);
+  animation: dotPulse 1.8s ease-in-out infinite;
+}
+@keyframes dotPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.2; transform:scale(0.6); } }
+h1.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(60px, 8vw, 108px);
+  line-height: 0.9; letter-spacing: 2px; color: var(--white); margin-bottom: 8px;
+}
+.name-word { display: inline-block; opacity: 0; transform: translateY(40px) skewY(3deg); }
+.name-word.go { animation: nameIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes nameIn { to { opacity:1; transform:none; } }
+h1.hero-name em { color: var(--brand); font-style: normal; display: block; }
+.hero-title {
+  font-size: 17px; font-weight: 300; color: var(--ghost);
+  margin-bottom: 20px; letter-spacing: 0.02em; min-height: 28px;
+}
+.typed-text { border-right: 2px solid var(--brand); padding-right: 2px; }
+.hero-desc { font-size: 15px; color: var(--steel); line-height: 1.8; max-width: 460px; margin-bottom: 36px; }
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--brand); color: var(--white);
+  padding: 14px 32px; border-radius: 3px;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.08em; text-decoration: none;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  display: inline-block; position: relative; overflow: hidden;
+}
+.btn-primary::before {
+  content: ''; position: absolute; top: 50%; left: -100%;
+  width: 100%; height: 100%; background: rgba(255,255,255,0.12);
+  transform: translateY(-50%) skewX(-20deg); transition: left 0.45s;
+}
+.btn-primary:hover::before { left: 150%; }
+.btn-primary:hover { background: var(--brand-light); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(230,58,30,0.45); }
+.btn-ghost {
+  border: 1px solid rgba(255,255,255,0.18); color: var(--white);
+  padding: 14px 32px; border-radius: 3px;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+  letter-spacing: 0.08em; text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s; display: inline-block;
+}
+.btn-ghost:hover { border-color: var(--brand); background: rgba(230,58,30,0.07); transform: translateY(-2px); }
+.hero-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+}
+.stat-cell { background: var(--bg-2); padding: 24px 16px; text-align: center; transition: background 0.3s; }
+.stat-cell:hover { background: var(--bg-3); }
+.stat-num { font-family: var(--font-display); font-size: 46px; color: var(--brand); line-height: 1; margin-bottom: 6px; }
+.stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+.hero-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+.badge {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--bg-3); color: var(--ghost);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 5px 12px; border-radius: 2px; letter-spacing: 0.05em;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s; cursor: default;
+}
+.badge:hover { border-color: var(--brand); color: var(--brand); transform: translateY(-2px); }
+section { padding: 100px 5vw; position: relative; z-index: 1; }
+.section-label { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.15em; color: var(--brand); text-transform: uppercase; margin-bottom: 12px; }
+h2.section-title { font-family: var(--font-display); font-size: clamp(40px, 5vw, 64px); letter-spacing: 1px; line-height: 1; margin-bottom: 16px; }
+.section-sub { font-size: 15px; color: var(--steel); max-width: 540px; line-height: 1.8; margin-bottom: 60px; }
+.slash-divider { display: flex; align-items: center; gap: 16px; margin-bottom: 60px; }
+.slash-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-left { opacity: 0; transform: translateX(-40px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+.reveal-left.visible { opacity: 1; transform: none; }
+.reveal-right { opacity: 0; transform: translateX(40px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+.reveal-right.visible { opacity: 1; transform: none; }
+#expertise { background: var(--bg-2); }
+.expertise-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2px; background: rgba(255,255,255,0.03); border-radius: 8px; overflow: hidden;
+}
+.expertise-card {
+  background: var(--bg-2); padding: 36px 30px;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s;
+  cursor: default; opacity: 0; transform: translateY(30px);
+}
+.expertise-card.card-in { animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes cardIn { to { opacity:1; transform:none; } }
+.expertise-card:hover { border-color: var(--brand); background: var(--bg-3); transform: translateY(-4px); }
+.exp-icon {
+  width: 44px; height: 44px;
+  background: rgba(230,58,30,0.1); border: 1px solid rgba(230,58,30,0.2);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px; font-size: 20px; transition: background 0.3s, transform 0.3s;
+}
+.expertise-card:hover .exp-icon { background: rgba(230,58,30,0.22); transform: scale(1.1) rotate(-5deg); }
+.expertise-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+.expertise-card p { font-size: 13px; color: var(--steel); line-height: 1.6; }
+.skill-bar { margin-bottom: 20px; }
+.skill-bar-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.skill-bar-label { font-family: var(--font-mono); font-size: 11px; color: var(--ghost); letter-spacing: 0.06em; }
+.skill-bar-pct { font-family: var(--font-mono); font-size: 11px; color: var(--brand); }
+.skill-bar-track { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.skill-bar-fill { height: 100%; background: var(--brand); border-radius: 2px; width: 0; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); }
+#courses { background: var(--bg); }
+.courses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.course-card {
+  background: var(--bg-2); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; overflow: hidden;
+  transition: border-color 0.3s, transform 0.35s, box-shadow 0.35s;
+  opacity: 0; transform: translateY(40px);
+}
+.course-card.card-in { animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
+.course-card:hover { border-color: var(--brand); transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+.course-thumb {
+  height: 160px; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  font-family: var(--font-display); font-size: 80px; letter-spacing: 2px;
+  color: rgba(255,255,255,0.04); background: var(--bg-3); transition: color 0.4s;
+}
+.course-card:hover .course-thumb { color: rgba(230,58,30,0.09); }
+.course-thumb-label {
+  position: absolute; top: 14px; left: 14px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  padding: 4px 10px; border-radius: 2px; background: var(--brand); color: var(--white); z-index: 1;
+}
+.course-body { padding: 24px; }
+.course-body h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.course-body p { font-size: 13px; color: var(--steel); line-height: 1.65; margin-bottom: 18px; }
+.course-meta { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+.course-level { font-family: var(--font-mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; }
+.course-cta { font-family: var(--font-mono); font-size: 12px; color: var(--brand); text-decoration: none; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; transition: gap 0.2s, color 0.2s; }
+.course-cta:hover { gap: 12px; color: var(--brand-light); }
+#tutorials { background: var(--bg-2); }
+.tutorials-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+.tutorial-list { display: flex; flex-direction: column; gap: 2px; }
+.tutorial-item {
+  display: flex; gap: 20px; align-items: flex-start;
+  padding: 20px; border-radius: 6px;
+  transition: background 0.25s, transform 0.25s; cursor: pointer; border: 1px solid transparent;
+}
+.tutorial-item:hover { background: var(--bg-3); border-color: rgba(255,255,255,0.05); transform: translateX(6px); }
+.tut-num { font-family: var(--font-display); font-size: 30px; color: rgba(230,58,30,0.22); line-height: 1; min-width: 34px; padding-top: 2px; transition: color 0.25s; }
+.tutorial-item:hover .tut-num { color: var(--brand); }
+.tut-content h4 { font-size: 14px; font-weight: 500; margin-bottom: 5px; }
+.tut-content p { font-size: 12px; color: var(--steel); }
+.tut-type { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 2px; margin-top: 8px; display: inline-block; }
+.tut-video { background: rgba(230,58,30,0.1); color: var(--brand); }
+.tut-written { background: rgba(255,255,255,0.05); color: var(--ghost); }
+.tutorial-cta-panel {
+  background: var(--bg-3); border: 1px solid rgba(230,58,30,0.15);
+  border-radius: 8px; padding: 40px 32px;
+  display: flex; flex-direction: column; gap: 20px;
+  position: sticky; top: 90px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.tutorial-cta-panel:hover { border-color: rgba(230,58,30,0.4); box-shadow: 0 0 40px rgba(230,58,30,0.05); }
+.tcp-title { font-family: var(--font-display); font-size: 36px; line-height: 1.05; }
+.tcp-title span { color: var(--brand); }
+.tcp-desc { font-size: 13px; color: var(--steel); line-height: 1.7; }
+#linkedin { background: var(--bg); }
+.linkedin-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.li-card {
+  background: var(--bg-2); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; overflow: hidden;
+  transition: transform 0.4s, box-shadow 0.4s;
+}
+.li-card:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.li-card-header {
+  height: 120px; background: linear-gradient(135deg, #0f1929 0%, #1a2a42 50%, #0f1929 100%);
+  position: relative; overflow: hidden;
+}
+.li-card-header::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 60% 60%, rgba(0,119,181,0.15) 0%, transparent 60%);
+  animation: liGlow 3s ease-in-out infinite alternate;
+}
+@keyframes liGlow { from { transform: scale(1); } to { transform: scale(1.1); } }
+.li-card-header::after { content: 'in'; position: absolute; right: 20px; top: 16px; font-family: var(--font-display); font-size: 52px; color: rgba(255,255,255,0.05); }
+.li-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 34px; color: var(--white);
+  border: 3px solid var(--bg-2); position: absolute; bottom: -40px; left: 28px;
+  transition: transform 0.3s; box-shadow: 0 4px 20px rgba(230,58,30,0.3);
+}
+.li-card:hover .li-avatar { transform: scale(1.06); }
+.li-card-body { padding: 52px 28px 28px; }
+.li-name { font-size: 19px; font-weight: 600; margin-bottom: 4px; }
+.li-sub { font-size: 13px; color: var(--steel); margin-bottom: 18px; }
+.li-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+.li-pill { font-family: var(--font-mono); font-size: 10px; background: var(--bg-3); color: var(--ghost); border: 1px solid rgba(255,255,255,0.05); padding: 4px 11px; border-radius: 40px; transition: border-color 0.2s, color 0.2s; }
+.li-pill:hover { border-color: var(--brand); color: var(--brand); }
+.li-connect-btn { display: inline-flex; align-items: center; gap: 8px; background: #0077B5; color: var(--white); padding: 11px 26px; border-radius: 24px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s, transform 0.15s, box-shadow 0.2s; }
+.li-connect-btn:hover { background: #005e8f; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,119,181,0.4); }
+.li-facts { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.li-fact { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--ghost); padding: 12px 16px; border-radius: 6px; border: 1px solid transparent; transition: background 0.2s, border-color 0.2s, transform 0.2s; }
+.li-fact:hover { background: var(--bg-2); border-color: rgba(255,255,255,0.05); transform: translateX(4px); }
+.li-fact-icon { width: 32px; height: 32px; background: rgba(230,58,30,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+#contact { background: var(--bg-2); }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+.contact-form { display: flex; flex-direction: column; gap: 16px; }
+label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em; display: block; margin-bottom: 6px; }
+input[type=text], input[type=email], textarea, select {
+  width: 100%; background: var(--bg-3); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px;
+  padding: 12px 16px; color: var(--white); font-family: var(--font-body); font-size: 15px;
+  outline: none; transition: border-color 0.25s, box-shadow 0.25s;
+}
+input[type=text]:focus, input[type=email]:focus, textarea:focus, select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(230,58,30,0.1); }
+textarea { min-height: 140px; resize: vertical; }
+select { cursor: pointer; }
+select option { background: var(--bg-3); }
+.submit-btn {
+  background: var(--brand); color: var(--white); padding: 14px 36px; border-radius: 3px; border: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 500; letter-spacing: 0.08em;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s; width: fit-content; position: relative; overflow: hidden;
+}
+.submit-btn::before { content: ''; position: absolute; top: 50%; left: -100%; width: 100%; height: 100%; background: rgba(255,255,255,0.1); transform: translateY(-50%) skewX(-20deg); transition: left 0.4s; }
+.submit-btn:hover::before { left: 150%; }
+.submit-btn:hover { background: var(--brand-light); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(230,58,30,0.4); }
+.contact-info h3 { font-family: var(--font-display); font-size: 42px; line-height: 1.05; margin-bottom: 16px; }
+.contact-info h3 span { color: var(--brand); }
+.contact-info p { font-size: 14px; color: var(--steel); line-height: 1.8; margin-bottom: 12px; }
+.contact-channels { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.channel { display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: var(--bg-3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.04); transition: border-color 0.25s, transform 0.25s; }
+.channel:hover { border-color: rgba(230,58,30,0.3); transform: translateX(6px); }
+.channel-icon { font-size: 18px; width: 32px; text-align: center; }
+.channel-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); display: block; letter-spacing: 0.08em; }
+.channel-val { font-size: 14px; color: var(--white); }
+.tag-strip { overflow: hidden; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg-2); position: relative; z-index: 1; }
+.tag-strip-track { display: flex; width: max-content; animation: stripScroll 28s linear infinite; }
+.tag-strip-item { font-family: var(--font-mono); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; padding: 0 28px; white-space: nowrap; border-right: 1px solid rgba(255,255,255,0.05); }
+.tag-strip-item.acc { color: var(--brand); }
+@keyframes stripScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+footer { background: #080808; padding: 40px 5vw; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); flex-wrap: wrap; gap: 16px; position: relative; z-index: 1; }
+.footer-logo { font-family: var(--font-display); font-size: 22px; color: var(--white); }
+.footer-logo span { color: var(--brand); }
+.footer-note { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--brand); }
+@media (max-width: 768px) {
+  #hero { grid-template-columns: 1fr; padding-top: 100px; }
+  .tutorials-layout, .linkedin-wrapper, .contact-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  h1.hero-name { font-size: 62px; }
+  body { cursor: auto; }
+  #cursor, #cursor-ring { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="fire-canvas"></canvas>
+
+<nav>
+  <a href="#hero" class="nav-logo">SHUVO DAS<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#expertise">Expertise</a></li>
+    <li><a href="#courses">Courses</a></li>
+    <li><a href="#tutorials">Tutorials</a></li>
+    <li><a href="#linkedin">Profile</a></li>
+    <li><a href="#contact" class="nav-cta">Hire Me</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-tag h-anim">Fire Protection Engineer · Shuvo Das · Bangladesh</div>
+    <h1 class="hero-name h-anim">
+      <span class="name-word">SHUVO DAS</span>
+      <em><span class="name-word">FIRE.</span></em>
+    </h1>
+    <p class="hero-title h-anim"><span class="typed-text" id="typed"></span></p>
+    <p class="hero-desc h-anim">NFPA-compliant system design, hydraulic calculations, and AutoCAD-based fire safety layouts — built to international and BNBC standards.</p>
+    <div class="hero-actions h-anim">
+      <a href="#courses" class="btn-primary">Explore Courses</a>
+      <a href="#contact" class="btn-ghost">Let's Work Together</a>
+    </div>
+    <div class="hero-badges h-anim">
+      <span class="badge">NFPA 13</span><span class="badge">NFPA 20</span><span class="badge">BNBC</span>
+      <span class="badge">Hydraulic Calc</span><span class="badge">AutoCAD</span><span class="badge">FM-200</span>
+      <span class="badge">Fire Alarm FACP</span><span class="badge">Jockey Pumps</span>
+      <span class="badge">NFPA 72</span><span class="badge">FSCD</span>
+    </div>
+  </div>
+  <div class="hero-right" id="hero-right" style="opacity:0;transform:translateX(40px);transition:all 0.9s cubic-bezier(0.16,1,0.3,1) 0.65s;">
+    <div class="hero-stats">
+      <div class="stat-cell"><div class="stat-num" data-count="5">0</div><div class="stat-label">Years Experience</div></div>
+      <div class="stat-cell"><div class="stat-num" data-count="50">0</div><div class="stat-label">Projects Designed</div></div>
+      <div class="stat-cell"><div class="stat-num" data-count="3">0</div><div class="stat-label">Standards Mastered</div></div>
+    </div>
+    <div style="margin-top:20px;background:var(--bg-3);border-radius:8px;padding:24px;border:1px solid rgba(255,255,255,0.05);">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--brand);letter-spacing:0.1em;margin-bottom:10px;">// CURRENT STATUS</div>
+      <p style="font-size:13px;color:var(--ghost);line-height:1.7;">Available for project consultation, fire system design reviews, and training collaborations. Open to full-time roles in MEP/fire protection engineering.</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:14px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#2ECC71;display:inline-block;animation:dotPulse 2s infinite;"></span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:#2ECC71;">Open to opportunities</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tag-strip">
+  <div class="tag-strip-track">
+    <span class="tag-strip-item acc">NFPA 13</span><span class="tag-strip-item">Sprinkler Design</span>
+    <span class="tag-strip-item acc">NFPA 20</span><span class="tag-strip-item">Fire Pump Systems</span>
+    <span class="tag-strip-item acc">BNBC</span><span class="tag-strip-item">Hydraulic Calculations</span>
+    <span class="tag-strip-item acc">NFPA 72</span><span class="tag-strip-item">Fire Detection & Alarm</span>
+    <span class="tag-strip-item acc">AutoCAD</span><span class="tag-strip-item">FM-200 Systems</span>
+    <span class="tag-strip-item acc">FSCD</span><span class="tag-strip-item">Smoke Management</span>
+    <span class="tag-strip-item acc">NFPA 13</span><span class="tag-strip-item">Sprinkler Design</span>
+    <span class="tag-strip-item acc">NFPA 20</span><span class="tag-strip-item">Fire Pump Systems</span>
+    <span class="tag-strip-item acc">BNBC</span><span class="tag-strip-item">Hydraulic Calculations</span>
+    <span class="tag-strip-item acc">NFPA 72</span><span class="tag-strip-item">Fire Detection & Alarm</span>
+    <span class="tag-strip-item acc">AutoCAD</span><span class="tag-strip-item">FM-200 Systems</span>
+    <span class="tag-strip-item acc">FSCD</span><span class="tag-strip-item">Smoke Management</span>
+  </div>
+</div>
+
+<section id="expertise" class="reveal">
+  <div class="slash-divider"><p class="section-label">01 / Expertise</p></div>
+  <h2 class="section-title">What I Design & Teach</h2>
+  <p class="section-sub">End-to-end fire protection engineering — from hazard classification and system selection to commissioning and code compliance.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:60px;">
+    <div class="reveal">
+      <div class="skill-bar"><div class="skill-bar-header"><span class="skill-bar-label">SPRINKLER SYSTEM DESIGN</span><span class="skill-bar-pct">95%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-width="95"></div></div></div>
+      <div class="skill-bar"><div class="skill-bar-header"><span class="skill-bar-label">HYDRAULIC CALCULATIONS</span><span class="skill-bar-pct">92%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-width="92"></div></div></div>
+      <div class="skill-bar"><div class="skill-bar-header"><span class="skill-bar-label">FIRE PUMP SYSTEMS</span><span class="skill-bar-pct">90%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-width="90"></div></div></div>
+      <div class="skill-bar"><div class="skill-bar-header"><span class="skill-bar-label">FIRE DETECTION & ALARM</span><span class="skill-bar-pct">88%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-width="88"></div></div></div>
+      <div class="skill-bar"><div class="skill-bar-header"><span class="skill-bar-label">AUTOCAD FIRE LAYOUTS</span><span class="skill-bar-pct">85%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-width="85"></div></div></div>
+      <div class="skill-bar"><div class="skill-bar-header"><span class="skill-bar-label">SMOKE MANAGEMENT</span><span class="skill-bar-pct">80%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" data-width="80"></div></div></div>
+    </div>
+    <div class="reveal" style="display:flex;flex-direction:column;justify-content:center;">
+      <p style="font-family:var(--font-mono);font-size:11px;color:var(--brand);letter-spacing:0.12em;margin-bottom:14px;">STANDARDS & APPROACH</p>
+      <p style="font-size:14px;color:var(--steel);line-height:1.8;margin-bottom:14px;">Deep familiarity with NFPA 13, NFPA 20, NFPA 72, BNBC, and FSCD. Each system I design is compliant from the ground up — not retrofitted.</p>
+      <p style="font-size:14px;color:var(--steel);line-height:1.8;">I bridge international best practices with Bangladesh's local code requirements, giving clients confidence in both technical accuracy and regulatory approval.</p>
+    </div>
+  </div>
+  <div class="expertise-grid">
+    <div class="expertise-card"><div class="exp-icon">🔥</div><h3>Sprinkler System Design</h3><p>NFPA 13 compliant layouts including hydraulic calculations, pipe sizing, and hazard occupancy classification.</p></div>
+    <div class="expertise-card"><div class="exp-icon">🚒</div><h3>Fire Pump Systems</h3><p>Fire pump selection per NFPA 20 — jockey pump logic, redundancy, suction tank sizing, and pressure analysis.</p></div>
+    <div class="expertise-card"><div class="exp-icon">🔔</div><h3>Fire Detection & Alarm</h3><p>FACP-based detection, detector spacing, zone mapping, addressable vs. conventional layouts, and alarm logic.</p></div>
+    <div class="expertise-card"><div class="exp-icon">💨</div><h3>Smoke Management</h3><p>Stairwell pressurization, smoke exhaust, atrium smoke control, and integration with building HVAC.</p></div>
+    <div class="expertise-card"><div class="exp-icon">🧯</div><h3>Special Hazard Suppression</h3><p>FM-200, CO₂, and clean agent systems for server rooms, electrical panels, and industrial applications.</p></div>
+    <div class="expertise-card"><div class="exp-icon">📐</div><h3>AutoCAD Fire Layouts</h3><p>Full fire system drawings: plan views, riser diagrams, sections, and coordination with architectural drawings.</p></div>
+  </div>
+</section>
+
+<section id="courses" class="reveal">
+  <div class="slash-divider"><p class="section-label">02 / Structured Courses</p></div>
+  <h2 class="section-title">Learn Fire System Design</h2>
+  <p class="section-sub">Practical, project-based courses for engineers. From NFPA fundamentals to full AutoCAD drawings — taught from real-world experience.</p>
+  <div class="courses-grid">
+    <div class="course-card"><div class="course-thumb">NFPA<span class="course-thumb-label">BESTSELLER</span></div><div class="course-body"><h3>NFPA 13 Sprinkler Design — Zero to Complete</h3><p>Master occupancy hazard classification, K-factors, hydraulic area selection, most remote area calculations, and compliant system layout.</p><div class="course-meta"><span class="course-level">BEGINNER → ADVANCED</span><a href="#contact" class="course-cta">Enroll <span>→</span></a></div></div></div>
+    <div class="course-card"><div class="course-thumb">CALC<span class="course-thumb-label">TECHNICAL</span></div><div class="course-body"><h3>Hydraulic Calculations for Fire Engineers</h3><p>Step-by-step hydraulic calculations using both manual methods and software. Hazen-Williams, pipe friction loss, demand vs. supply curves.</p><div class="course-meta"><span class="course-level">INTERMEDIATE</span><a href="#contact" class="course-cta">Enroll <span>→</span></a></div></div></div>
+    <div class="course-card"><div class="course-thumb">CAD<span class="course-thumb-label">PRACTICAL</span></div><div class="course-body"><h3>AutoCAD Fire System Drawings from Scratch</h3><p>Learn to produce professional fire system plan drawings, riser diagrams, and schedules using AutoCAD — aligned to industry standards.</p><div class="course-meta"><span class="course-level">ALL LEVELS</span><a href="#contact" class="course-cta">Enroll <span>→</span></a></div></div></div>
+  </div>
+</section>
+
+<section id="tutorials" class="reveal">
+  <div class="slash-divider"><p class="section-label">03 / Tutorials</p></div>
+  <div class="tutorials-layout">
+    <div>
+      <h2 class="section-title">Free Knowledge Hub</h2>
+      <p class="section-sub">Regular video and written tutorials on real fire protection topics. No fluff — direct, technical, practical.</p>
+      <div class="tutorial-list">
+        <div class="tutorial-item"><div class="tut-num">01</div><div class="tut-content"><h4>How to Classify Hazard Occupancy per NFPA 13</h4><p>Light, Ordinary, Extra hazard — decision process with real building examples.</p><span class="tut-type tut-video">▶ VIDEO</span></div></div>
+        <div class="tutorial-item"><div class="tut-num">02</div><div class="tut-content"><h4>10 Common Fire System Design Mistakes</h4><p>Critical errors engineers make in pump selection, spacing, and hydraulics.</p><span class="tut-type tut-written">✍ ARTICLE</span></div></div>
+        <div class="tutorial-item"><div class="tut-num">03</div><div class="tut-content"><h4>Reading a Fire System Riser Diagram</h4><p>How to interpret components, notation, and flow paths in a riser drawing.</p><span class="tut-type tut-video">▶ VIDEO</span></div></div>
+        <div class="tutorial-item"><div class="tut-num">04</div><div class="tut-content"><h4>BNBC vs NFPA: Key Differences for BD Engineers</h4><p>Where Bangladeshi code aligns with and diverges from international standards.</p><span class="tut-type tut-written">✍ ARTICLE</span></div></div>
+        <div class="tutorial-item"><div class="tut-num">05</div><div class="tut-content"><h4>Jockey Pump Logic Explained</h4><p>Why pressure settings matter and how to set pressure differentials correctly.</p><span class="tut-type tut-video">▶ VIDEO</span></div></div>
+      </div>
+    </div>
+    <div class="tutorial-cta-panel">
+      <div class="tcp-title">Get <span>Notified</span> of New Tutorials</div>
+      <p class="tcp-desc">New content published weekly — covering NFPA standards, hydraulic methods, detection system design, and more.</p>
+      <input type="email" placeholder="your.email@example.com">
+      <button class="submit-btn" style="width:100%;text-align:center;">Subscribe for Updates</button>
+      <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);">No spam. Unsubscribe anytime.</p>
+    </div>
+  </div>
+</section>
+
+<section id="linkedin" class="reveal">
+  <div class="slash-divider"><p class="section-label">04 / Professional Profile</p></div>
+  <div class="linkedin-wrapper">
+    <div class="li-card reveal-left">
+      <div class="li-card-header"><div class="li-avatar">S</div></div>
+      <div class="li-card-body">
+        <div class="li-name">Shuvo Das</div>
+        <div class="li-sub">Fire Protection Engineer · MEP Specialist · Bangladesh</div>
+        <div class="li-pills">
+          <span class="li-pill">NFPA 13 / 20</span><span class="li-pill">BNBC</span>
+          <span class="li-pill">Hydraulic Design</span><span class="li-pill">AutoCAD</span>
+          <span class="li-pill">FSCD</span><span class="li-pill">Fire Detection</span>
+        </div>
+        <a href="https://www.linkedin.com/in/" target="_blank" class="li-connect-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path></svg>
+          Connect on LinkedIn
+        </a>
+      </div>
+    </div>
+    <div class="linkedin-text reveal-right">
+      <h2 class="section-title">Verify My Professional Background</h2>
+      <p style="font-size:14px;color:var(--steel);line-height:1.8;margin-bottom:14px;">My LinkedIn profile is the most complete view of my engineering history — including project experience, endorsements from colleagues, and content that has reached thousands of professionals in the fire safety industry.</p>
+      <p style="font-size:14px;color:var(--steel);line-height:1.8;">Recruiters, hiring managers, and project leads are welcome to review my background and reach out directly through LinkedIn or the contact form.</p>
+      <div class="li-facts">
+        <div class="li-fact"><div class="li-fact-icon">🏢</div><span>Experienced in commercial, industrial, and high-rise fire protection design</span></div>
+        <div class="li-fact"><div class="li-fact-icon">📋</div><span>Familiar with NFPA 13, NFPA 20, NFPA 72, BNBC, and FSCD requirements</span></div>
+        <div class="li-fact"><div class="li-fact-icon">🤝</div><span>Open to collaboration, consultation, and full-time opportunities</span></div>
+        <div class="li-fact"><div class="li-fact-icon">📢</div><span>Active content creator sharing fire engineering knowledge with 1,000+ followers</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="reveal">
+  <div class="slash-divider"><p class="section-label">05 / Get In Touch</p></div>
+  <div class="contact-grid">
+    <div class="contact-info reveal-left">
+      <h3>Let's Build<br>Something <span>Together</span></h3>
+      <p>Whether you're a recruiter looking for fire protection talent, an engineer seeking consultation, or someone wanting to collaborate on training content — I'd love to hear from you.</p>
+      <div class="contact-channels">
+        <div class="channel"><div class="channel-icon">📧</div><div><span class="channel-label">EMAIL</span><span class="channel-val">shuvo@example.com</span></div></div>
+        <div class="channel"><div class="channel-icon">🌐</div><div><span class="channel-label">LINKEDIN</span><span class="channel-val">linkedin.com/in/shuvodas</span></div></div>
+        <div class="channel"><div class="channel-icon">📍</div><div><span class="channel-label">LOCATION</span><span class="channel-val">Dhaka, Bangladesh</span></div></div>
+      </div>
+    </div>
+    <div class="contact-form reveal-right">
+      <div><label>YOUR NAME</label><input type="text" placeholder="Eng. Full Name"></div>
+      <div><label>EMAIL ADDRESS</label><input type="email" placeholder="you@company.com"></div>
+      <div><label>REASON FOR CONTACT</label>
+        <select><option value="">Select a reason...</option><option>Job Opportunity</option><option>Project Consultation</option><option>Course Inquiry</option><option>Collaboration</option><option>General Question</option></select>
+      </div>
+      <div><label>MESSAGE</label><textarea placeholder="Describe your project, opportunity, or question..."></textarea></div>
+      <button class="submit-btn">Send Message →</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">SHUVO DAS<span>.</span></div>
+  <p class="footer-note">© 2025 Shuvo Das · Fire Protection Engineer · Bangladesh</p>
+  <div class="footer-links">
+    <a href="#expertise">Expertise</a><a href="#courses">Courses</a>
+    <a href="#tutorials">Tutorials</a><a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+/* CURSOR */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.addEventListener('mouseover',e=>{if(e.target.closest('a,button')){cur.style.width='20px';cur.style.height='20px';ring.style.width='52px';ring.style.height='52px';}});
+document.addEventListener('mouseout',e=>{if(e.target.closest('a,button')){cur.style.width='12px';cur.style.height='12px';ring.style.width='36px';ring.style.height='36px';}});
+
+/* FIRE CANVAS */
+const cv=document.getElementById('fire-canvas'),c=cv.getContext('2d');
+function resize(){cv.width=innerWidth;cv.height=innerHeight;}
+resize();window.addEventListener('resize',resize);
+const pts=[];
+class P{
+  constructor(){this.rs();}
+  rs(){this.x=Math.random()*cv.width;this.y=cv.height+10;this.vx=(Math.random()-.5)*.8;this.vy=-(Math.random()*2+.7);this.l=1;this.d=Math.random()*.004+.002;this.s=Math.random()*3+1;this.h=Math.random()*28+4;}
+  tick(){this.x+=this.vx;this.y+=this.vy;this.vx+=(Math.random()-.5)*.05;this.l-=this.d;this.s*=.999;if(this.l<=0)this.rs();}
+  draw(){c.save();c.globalAlpha=this.l*.55;c.fillStyle=`hsl(${this.h},100%,${50+this.l*30}%)`;c.shadowColor=c.fillStyle;c.shadowBlur=5;c.beginPath();c.arc(this.x,this.y,this.s,0,Math.PI*2);c.fill();c.restore();}
+}
+for(let i=0;i<140;i++){const p=new P();p.y=Math.random()*cv.height;p.l=Math.random();pts.push(p);}
+(function loop(){c.clearRect(0,0,cv.width,cv.height);pts.forEach(p=>{p.tick();p.draw();});requestAnimationFrame(loop);})();
+
+/* HERO ENTRANCE */
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.h-anim').forEach((el,i)=>setTimeout(()=>el.classList.add('go'),i*150+200));
+  document.querySelectorAll('.name-word').forEach((el,i)=>setTimeout(()=>el.classList.add('go'),i*150+400));
+  setTimeout(()=>{const h=document.getElementById('hero-right');h.style.opacity='1';h.style.transform='none';},700);
+  typeNext();
+  setTimeout(countUp,900);
+});
+
+/* TYPEWRITER */
+const lines=['Fire Protection & Detection Systems Specialist','NFPA 13 · NFPA 20 · BNBC Certified','Hydraulic Calculations Expert','AutoCAD Fire System Designer'];
+let li=0,ci=0,del=false;
+function typeNext(){
+  const el=document.getElementById('typed'),full=lines[li];
+  if(!del){el.textContent=full.slice(0,++ci);if(ci===full.length){del=true;setTimeout(typeNext,2200);}else setTimeout(typeNext,55);}
+  else{el.textContent=full.slice(0,--ci);if(ci===0){del=false;li=(li+1)%lines.length;setTimeout(typeNext,300);}else setTimeout(typeNext,28);}
+}
+
+/* COUNT UP */
+function countUp(){
+  document.querySelectorAll('.stat-num[data-count]').forEach(el=>{
+    const t=parseInt(el.dataset.count);let n=0;const s=t/40;
+    const iv=setInterval(()=>{n+=s;if(n>=t){el.textContent=t+'+';clearInterval(iv);}else el.textContent=Math.floor(n)+(n>0?'+':'');},40);
+  });
+}
+
+/* SCROLL REVEAL */
+const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');ro.unobserve(e.target);}}),{threshold:0.08});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>ro.observe(el));
+
+/* CARD STAGGER */
+const co=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.expertise-card,.course-card').forEach((c,i)=>setTimeout(()=>c.classList.add('card-in'),i*100));co.unobserve(e.target);}}),{threshold:0.1});
+document.querySelectorAll('.expertise-grid,.courses-grid').forEach(g=>co.observe(g));
+
+/* SKILL BARS */
+const bo=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.skill-bar-fill').forEach((b,i)=>setTimeout(()=>b.style.width=b.dataset.width+'%',i*120));bo.unobserve(e.target);}}),{threshold:0.3});
+document.querySelectorAll('section').forEach(s=>bo.observe(s));
+
+/* NAV HIGHLIGHT */
+const secs=document.querySelectorAll('section[id]'),nls=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{let cur='';secs.forEach(s=>{if(scrollY>=s.offsetTop-110)cur=s.id;});nls.forEach(a=>{a.style.color=a.getAttribute('href')==='#'+cur?'var(--white)':'';});},{passive:true});
+</script>
+</body>
+</html>
